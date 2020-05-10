@@ -4,14 +4,14 @@ WORKDIR /opt
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install basic dependencies
-RUN apt-get update -y \
-    && apt-get install -y git aptitude
+RUN apt-get update \
+    && apt-get install -y git
 
 # Download janus-gateway
 RUN git clone git://github.com/axelboberg/janus-gateway.git
 
 # Download and install Janus' dependencies
-RUN aptitude install -y libmicrohttpd-dev libjansson-dev \
+RUN apt-get install -y libmicrohttpd-dev libjansson-dev \
 	  libssl-dev libsrtp2-dev libsofia-sip-ua-dev libglib2.0-dev \
 	  libopus-dev libogg-dev libcurl4-openssl-dev libconfig-dev \
 	  pkg-config gengetopt libtool automake libnice-dev build-essential
