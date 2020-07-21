@@ -12,17 +12,27 @@ RUN git clone git://github.com/axelboberg/janus-gateway.git
 
 # Download and install Janus' dependencies
 RUN apt-get install -y libmicrohttpd-dev libjansson-dev \
-	  libssl-dev libsrtp2-dev libsofia-sip-ua-dev libglib2.0-dev \
+	  libssl-dev libsofia-sip-ua-dev libglib2.0-dev openssl \
 	  libopus-dev libogg-dev libcurl4-openssl-dev libconfig-dev \
 	  pkg-config gengetopt libtool automake libnice-dev build-essential
+
+# Download and install libsrtp
+# from the 2.2.0 stable release
+RUN git clone --depth 1 --branch v2.2.0 https://github.com/cisco/libsrtp \
+    && cd libsrtp \
+    && ./configure \
+      --enable-openssl \
+    && make \
+    && make install \
+    && cd ../ \
+    && rm -r libsrtp
 
 # Download and install libwebsockets
 # from the v4.0-stable -branch
 # for the latest stable version
 RUN apt-get install -y cmake \
-    && git clone https://libwebsockets.org/repo/libwebsockets \
+    && git clone --depth 1 --branch v4.0-stable https://github.com/warmcat/libwebsockets \
     && cd libwebsockets \
-    && git checkout v4.0-stable \
     && mkdir build \
     && cd build \
     && cmake \
@@ -38,13 +48,11 @@ RUN apt-get install -y cmake \
 RUN cd janus-gateway \
     && sh autogen.sh \
     && ./configure \
-      --disable-data-channels \
       --disable-rabbitmq \
       --disable-docs \
       --prefix=/opt/janus \
       --disable-all-plugins \
       --enable-plugin-duktape \
-      --enable-plugin-videoroom \
       LDFLAGS="-L/usr/local/lib -Wl,-rpath=/usr/local/lib" \
       CFLAGS="-I/usr/local/include" \
     && make \
